@@ -2,7 +2,7 @@ import { auth, db } from '@config/firebaseConfig';
 import { devLog } from '@utils/dev-log';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { collection, getDocs, query, where } from 'firebase/firestore';
-import { getUserProfile } from './user.service';
+import { getUserProfile } from '../firebase/user.service';
 
 function requireAuth() {
   if (!auth) {
