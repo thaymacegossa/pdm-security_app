@@ -49,6 +49,17 @@ export default function RegisterRoute() {
             behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         >
             <Pressable style={styles.root} onPress={Keyboard.dismiss} accessible={false}>
+                <View style={styles.header}>
+                    <Pressable
+                        onPress={() => router.replace('/sign-in')}
+                        style={({ pressed }) => [
+                            styles.backButton,
+                            pressed ? styles.backButtonPressed : null,
+                        ]}
+                    >
+                        <Text style={styles.backButtonText}>←</Text>
+                    </Pressable>
+                </View>
                 <View style={styles.card}>
                     <Text style={styles.title}>Registrar</Text>
                     <Text style={styles.subtitle}>Crie sua conta preenchendo os dados abaixo</Text>
@@ -250,5 +261,26 @@ const styles = StyleSheet.create({
         color: '#ffffff',
         fontSize: 16,
         fontWeight: '700',
+    },
+    header: {
+        position: 'absolute',
+        top: 60,
+        left: 20,
+        zIndex: 10,
+    },
+    backButton: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'rgba(0,0,0,0.05)',
+    },
+    backButtonPressed: {
+        backgroundColor: 'rgba(0,0,0,0.12)',
+    },
+    backButtonText: {
+        fontSize: 22,
+        color: '#121316',
     },
 });
