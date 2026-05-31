@@ -3,16 +3,18 @@
 import { router } from 'expo-router';
 import { useCallback } from 'react';
 import {
-    ActivityIndicator,
-    KeyboardAvoidingView,
-    Platform,
-    Pressable,
-    StyleSheet,
-    Text,
-    TextInput,
-    View,
+	ActivityIndicator,
+	Keyboard,
+	KeyboardAvoidingView,
+	Platform,
+	Pressable,
+	StyleSheet,
+	Text,
+	TextInput,
+	View,
 } from 'react-native';
 
+import Colors from '@/constants/Colors';
 import { useSignIn } from '@/src/hooks/useSignIn';
 
 export default function SignInRoute() {
@@ -41,7 +43,8 @@ export default function SignInRoute() {
 			style={styles.root}
 			behavior={Platform.OS === 'ios' ? 'padding' : undefined}
 		>
-			<View style={styles.card}>
+			<Pressable style={styles.root} onPress={Keyboard.dismiss} accessible={false}>
+				<View style={styles.card}>
 				<Text style={styles.title}>Entrar</Text>
 				<Text style={styles.subtitle}>Acesse com CPF ou email e sua senha</Text>
 
@@ -96,7 +99,13 @@ export default function SignInRoute() {
 						<Text style={styles.buttonText}>Entrar</Text>
 					)}
 				</Pressable>
+
+				<Pressable onPress={() => router.push('/register')} style={styles.signUpLink}>
+					<Text style={styles.signUpText}>Cadastrar-se</Text>
+				</Pressable>
+
 			</View>
+		</Pressable>
 		</KeyboardAvoidingView>
 	);
 }
@@ -104,7 +113,7 @@ export default function SignInRoute() {
 const styles = StyleSheet.create({
 	root: {
 		flex: 1,
-		backgroundColor: '#f5f7fa',
+		backgroundColor: Colors.light.background,
 		justifyContent: 'center',
 		paddingHorizontal: 20,
 	},
@@ -121,7 +130,7 @@ const styles = StyleSheet.create({
 	title: {
 		fontSize: 26,
 		fontWeight: '700',
-		color: '#121316',
+		color: Colors.light.text,
 	},
 	subtitle: {
 		marginTop: 6,
@@ -135,7 +144,7 @@ const styles = StyleSheet.create({
 	label: {
 		fontSize: 13,
 		fontWeight: '600',
-		color: '#1f2430',
+		color: Colors.light.text,
 		marginBottom: 8,
 	},
 	input: {
@@ -157,7 +166,7 @@ const styles = StyleSheet.create({
 	},
 	button: {
 		marginTop: 4,
-		backgroundColor: '#065f46',
+		backgroundColor: Colors.light.tint,
 		borderRadius: 12,
 		alignItems: 'center',
 		justifyContent: 'center',
@@ -174,4 +183,14 @@ const styles = StyleSheet.create({
 		fontSize: 16,
 		fontWeight: '700',
 	},
+	// link para registrar
+	signUpLink: {
+		marginTop: 12,
+		alignItems: 'center',
+	},
+	signUpText: {
+		color: Colors.light.tint,
+		fontSize: 13,
+		fontWeight: '600'
+	}
 });
