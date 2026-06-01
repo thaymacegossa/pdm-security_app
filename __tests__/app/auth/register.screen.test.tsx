@@ -12,7 +12,7 @@ jest.mock('expo-router', () => ({
   },
 }));
 
-jest.mock('@/src/hooks/useRegister', () => ({
+jest.mock('@/src/hooks/auth/useRegister', () => ({
   useRegister: jest.fn(),
 }));
 

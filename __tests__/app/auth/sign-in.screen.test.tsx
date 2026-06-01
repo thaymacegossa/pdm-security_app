@@ -13,7 +13,7 @@ jest.mock('expo-router', () => ({
   },
 }));
 
-jest.mock('@/src/hooks/useSignIn', () => ({
+jest.mock('@/src/hooks/auth/useSignIn', () => ({
   useSignIn: jest.fn(),
 }));
 
