@@ -42,6 +42,7 @@ function mapRegisterError(error: unknown): string {
 }
 
 export function useRegister() {
+	const { save: saveAuth } = useAuthStore();
 	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
 	const [name, setName] = useState('');
@@ -103,8 +104,7 @@ export function useRegister() {
 			});
 
 			devLog('[useRegister] usuario registrado', { userId: user.uid });
-			const { save } = useAuthStore();
-			await save(user.uid, user.displayName || data.name);
+			await saveAuth(user.uid, user.displayName || data.name);
 			return {
 				userId: user.uid,
 				token: await user.getIdToken(),
@@ -117,7 +117,7 @@ export function useRegister() {
 		} finally {
 			setIsLoading(false);
 		}
-	}, [email, password, name, cpf, phone, passwordEmerg, isFormValid, isLoading]);
+	}, [email, password, name, cpf, phone, passwordEmerg, isFormValid, isLoading, saveAuth]);
 
 	return {
 		email,
