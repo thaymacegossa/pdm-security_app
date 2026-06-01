@@ -1,7 +1,7 @@
 import { fireEvent, render, waitFor } from '@testing-library/react-native';
 
 import SignInRoute from '@/app/(auth)/sign-in';
-import { useSignIn } from '@/src/hooks/useSignIn';
+import { useSignIn } from '@/src/hooks/auth/useSignIn';
 
 const mockReplace = jest.fn();
 const mockPush = jest.fn();

@@ -1,6 +1,6 @@
 import { act, renderHook } from '@testing-library/react-native';
 
-import { useRegister } from '@/src/hooks/useRegister';
+import { useRegister } from '@/src/hooks/auth/useRegister';
 import { saveUserProfile } from '@services/firebase/user.service';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 

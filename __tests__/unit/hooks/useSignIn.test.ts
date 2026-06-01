@@ -1,6 +1,6 @@
 import { act, renderHook } from '@testing-library/react-native';
 
-import { useSignIn } from '@/src/hooks/useSignIn';
+import { useSignIn } from '@/src/hooks/auth/useSignIn';
 import { loginWithEmailOrCpf } from '@services/auth/auth.service';
 
 jest.mock('@services/auth/auth.service', () => ({
