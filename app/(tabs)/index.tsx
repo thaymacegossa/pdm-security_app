@@ -1,34 +1,37 @@
-import { useState } from 'react';
-import { StyleSheet } from 'react-native';
-
-import EditScreenInfo from '@/components/EditScreenInfo';
-import SlideToUnlock from '@/components/SlideToCall';
+﻿// app/(tabs)/index.tsx
+import AlertsCard from '@/components/AlertsCard';
+import ContactsCard from '@/components/ContactsCard';
 import { Text, View } from '@/components/Themed';
+import { useAuthStore } from '@/src/store/auth-store';
+import { StatusBar } from 'expo-status-bar';
+import { ScrollView, StyleSheet } from 'react-native';
 
-export default function TabOneScreen() {
-  const [showMessage, setShowMessage] = useState(false);
+export default function HomePage() {
+  const { user, isLoading } = useAuthStore();
+
+  if (isLoading) {
+    return (
+      <View style={styles.centered}>
+        <Text style={styles.loadingText}>Carregando...</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>SOS Mulheres</Text>
-
-      <View
-        style={styles.separator}
-        lightColor="#eee"
-        darkColor="rgba(255,255,255,0.1)"
-      />
-
-      <EditScreenInfo path="app/(tabs)/index.tsx" />
-
-      <SlideToUnlock
-        onUnlock={() => setShowMessage(true)}
-      />
-
-      {showMessage && (
-        <Text style={styles.successMessage}>
-          Pedido de ajuda encaminhado
-        </Text>
-      )}
+      <StatusBar style="auto" />
+      <ScrollView style={styles.scrollContainer} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        <Text style={styles.pageTitle}>Dashboard</Text>
+        <Text style={styles.pageSubtitle}>Resumo rápido dos seus contatos e alertas.</Text>
+        {user ? (
+          <>
+            <ContactsCard userId={user.userId} />
+            <AlertsCard userId={user.userId} />
+          </>
+        ) : (
+          <Text style={styles.pageSubtitle}>Usuário não encontrado.</Text>
+        )}
+      </ScrollView>
     </View>
   );
 }
@@ -36,23 +39,35 @@ export default function TabOneScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
+    backgroundColor: '#f5f5f5',
+  },
+  scrollContainer: {
+    flex: 1,
+  },
+  content: {
+    padding: 16,
+    paddingTop: 24,
+    paddingBottom: 120,
+  },
+  pageTitle: {
+    fontSize: 26,
+    fontWeight: '800',
+    color: '#111',
+    marginBottom: 8,
+  },
+  pageSubtitle: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 20,
+  },
+  centered: {
+    flex: 1,
     justifyContent: 'center',
-    padding: 20,
+    alignItems: 'center',
+    backgroundColor: '#f5f5f5',
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
-  separator: {
-    marginVertical: 30,
-    height: 1,
-    width: '80%',
-  },
-  successMessage: {
-    marginTop: 20,
-    color: 'green',
-    fontWeight: 'bold',
-    fontSize: 16,
+  loadingText: {
+    fontSize: 18,
+    color: '#666',
   },
 });

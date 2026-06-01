@@ -53,10 +53,11 @@ export async function saveAlert(userId: string, alertData: {
     try {
         const database = requireDb();
         const alertRef = collection(database, "users", userId, "alerts");
-        await addDoc(alertRef, {
+        const docRef = await addDoc(alertRef, {
             ...alertData,
             startedAt: serverTimestamp(),
         });
+        return docRef.id;
     } catch (error) {
         devLog("[saveAlert] erro", error);
         throw error;

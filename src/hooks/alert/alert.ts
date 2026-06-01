@@ -1,28 +1,47 @@
-import { saveAlert } from "@/src/services/firebase/alert.service";
-import { getCurrentLocation } from "@/src/services/location.service";
-import { useAuthStore } from "@/src/store/auth-store";
+import { deleteAlert, saveAlert } from "@/src/services/firebase/alert.service";
+import { getCurrentLocation, LocationData } from "@/src/services/location.service";
 import { devLog } from '@utils/dev-log';
 
-
-export async function alertTrigger() {
+export async function alertTrigger(userId: string): Promise<{
+    alertId: string;
+    location: LocationData;
+} | null> {
     try {
-        const { user } = useAuthStore();
         const location = await getCurrentLocation();
-        const address = location?.address || "Unknown Location";
+        if (!location) {
+            throw new Error('Não foi possível obter a localização.');
+        }
+
+        const address = location.address || `${location.latitude.toFixed(5)}, ${location.longitude.toFixed(5)}`;
         const geolocation = {
-            latitude: location?.latitude || 0,
-            longitude: location?.longitude || 0,
+            latitude: location.latitude,
+            longitude: location.longitude,
         };
 
-        const triggerAlert = await saveAlert(user?.userId || "unknown_user", {
+        const alertId = await saveAlert(userId, {
             actualAlert: true,
             geolocation,
             location: address,
         });
-        devLog("[useSosTrigger] alerta salvo no Firebase", { triggerAlert });
-    } catch (error) {
-        devLog("[useSosTrigger] erro ao salvar alerta no Firebase", { error });
-    }
 
-    return location;
+        devLog('[alertTrigger] alerta salvo no Firebase', { alertId });
+
+        return {
+            alertId,
+            location,
+        };
+    } catch (error) {
+        devLog('[alertTrigger] erro ao salvar alerta no Firebase', { error });
+        return null;
+    }
+}
+
+export async function cancelAlert(userId: string, alertId: string) {
+    try {
+        await deleteAlert(userId, alertId);
+        devLog('[cancelAlert] alerta cancelado', { userId, alertId });
+    } catch (error) {
+        devLog('[cancelAlert] erro ao cancelar alerta', { error });
+        throw error;
+    }
 }
