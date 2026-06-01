@@ -12,7 +12,7 @@ import {
     View,
 } from 'react-native';
 
-import { useRegister } from '@/src/hooks/useRegister';
+import { useRegister } from '@/src/hooks/auth/useRegister';
 
 export default function RegisterRoute() {
     const {
