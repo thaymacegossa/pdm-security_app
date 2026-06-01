@@ -1,7 +1,7 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { Tabs, useRouter } from 'expo-router';
-import React, { useState } from 'react';
-import { Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React from 'react';
+import { Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import SlideToUnlock from '@/components/SlideToCall';
 import { useClientOnlyValue } from '@/components/useClientOnlyValue';
@@ -12,38 +12,9 @@ import { logout } from '@services/auth/auth.service';
 
 type RoutePath = '/' | '/contactsPage' | '/alertsPage';
 
-function HeaderMenu({ visible, onClose, onNavigate, onLogout }: { visible: boolean; onClose: () => void; onNavigate: (path: RoutePath) => void; onLogout: () => void; }) {
-  return (
-    <Modal transparent visible={visible} animationType="fade" onRequestClose={onClose}>
-      <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={onClose}>
-        <View style={styles.modalContent}>
-          <Text style={styles.modalTitle}>Navegação</Text>
-          <TouchableOpacity style={styles.modalButton} onPress={() => { onNavigate('/'); onClose(); }}>
-            <Text style={styles.modalButtonText}>Página Principal</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.modalButton} onPress={() => { onNavigate('/contactsPage'); onClose(); }}>
-            <Text style={styles.modalButtonText}>Contatos</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.modalButton} onPress={() => { onNavigate('/alertsPage'); onClose(); }}>
-            <Text style={styles.modalButtonText}>Alertas</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.modalButton, styles.logoutMenuButton]} onPress={() => { onLogout(); onClose(); }}>
-            <Text style={[styles.modalButtonText, styles.logoutMenuText]}>Sair</Text>
-          </TouchableOpacity>
-        </View>
-      </TouchableOpacity>
-    </Modal>
-  );
-}
-
 function CustomHeader() {
   const { user, clear } = useAuthStore();
-  const [menuOpen, setMenuOpen] = useState(false);
   const router = useRouter();
-
-  const handleNavigate = (path: RoutePath) => {
-    router.push(path);
-  };
 
   const handleLogout = async () => {
     try {
@@ -63,16 +34,9 @@ function CustomHeader() {
         {user && <Text style={styles.headerSubtitle}>Olá, {user.name}</Text>}
       </View>
 
-      <Pressable style={styles.hamburgerButton} onPress={() => setMenuOpen(true)}>
-        <FontAwesome name="bars" size={22} color="#111" />
+      <Pressable style={styles.logoutButton} onPress={handleLogout}>
+        <FontAwesome name="sign-out" size={22} color="#f44336" />
       </Pressable>
-
-      <HeaderMenu
-        visible={menuOpen}
-        onClose={() => setMenuOpen(false)}
-        onNavigate={handleNavigate}
-        onLogout={handleLogout}
-      />
     </View>
   );
 }
@@ -93,6 +57,33 @@ function CustomTabBar() {
   );
 }
 
+function BottomNavigation() {
+  const router = useRouter();
+  const colorScheme = useColorScheme();
+  const tintColor = Colors[colorScheme ?? 'light'].tint;
+
+  const navigationItems = [
+    { icon: 'home', label: 'Principal', path: '/' },
+    { icon: 'address-book', label: 'Contatos', path: '/contactsPage' },
+    { icon: 'exclamation-triangle', label: 'Alertas', path: '/alertsPage' },
+  ];
+
+  return (
+    <View style={styles.bottomNavContainer}>
+      {navigationItems.map((item) => (
+        <TouchableOpacity
+          key={item.path}
+          style={styles.navButton}
+          onPress={() => router.push(item.path as RoutePath)}
+        >
+          <FontAwesome name={item.icon as any} size={24} color={tintColor} />
+          <Text style={[styles.navLabel, { color: tintColor }]}>{item.label}</Text>
+        </TouchableOpacity>
+      ))}
+    </View>
+  );
+}
+
 // You can explore the built-in icon families on the web at https://icons.expo.fyi/
 function TabBarIcon(props: {
   name: React.ComponentProps<typeof FontAwesome>['name'];
@@ -103,6 +94,7 @@ function TabBarIcon(props: {
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  const { user, isLoading } = useAuthStore();
 
   return (
     <View style={styles.outerContainer}>
@@ -135,7 +127,16 @@ export default function TabLayout() {
           }}
         />
       </Tabs>
-      <CustomTabBar />
+      <View style={styles.sliderContainer}>
+        {isLoading ? (
+          <Text style={styles.loadingSliderText}>Carregando usuário...</Text>
+        ) : user ? (
+          <SlideToUnlock user={user} />
+        ) : (
+          <Text style={styles.loadingSliderText}>Faça login para usar o slider</Text>
+        )}
+      </View>
+      <BottomNavigation />
     </View>
   );
 }
@@ -167,7 +168,7 @@ const styles = StyleSheet.create({
     color: '#666',
     marginTop: 4,
   },
-  hamburgerButton: {
+  logoutButton: {
     width: 42,
     height: 42,
     borderRadius: 999,
@@ -175,51 +176,46 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  sliderContainer: {
+    paddingHorizontal: 16,
+    paddingVertical: 18,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
   tabBarContainer: {
     paddingHorizontal: 16,
     paddingVertical: 18,
     backgroundColor: '#fff',
-    borderTopWidth: 1,
-    borderTopColor: '#eee',
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+    justifyContent: 'center',
   },
   loadingSliderText: {
     fontSize: 14,
     color: '#666',
     textAlign: 'center',
   },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.35)',
-    justifyContent: 'flex-end',
-  },
-  modalContent: {
+  bottomNavContainer: {
+    width: '100%',
+    height: 80,
     backgroundColor: '#fff',
-    padding: 16,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    paddingBottom: 10,
   },
-  modalTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    marginBottom: 12,
-    color: '#111',
+  navButton: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 8,
   },
-  modalButton: {
-    backgroundColor: '#f7f7f7',
-    paddingVertical: 14,
-    paddingHorizontal: 12,
-    borderRadius: 12,
-    marginBottom: 10,
-  },
-  logoutMenuButton: {
-    backgroundColor: '#f44336',
-  },
-  logoutMenuText: {
-    color: '#fff',
-  },
-  modalButtonText: {
-    fontSize: 15,
-    color: '#111',
+  navLabel: {
+    fontSize: 12,
     fontWeight: '600',
+    marginTop: 6,
   },
 });
