@@ -1,7 +1,6 @@
-
-
 import { useCallback, useMemo, useState } from 'react';
 
+import { useAuthStore } from '@/src/store/auth-store';
 import { loginWithEmailOrCpf } from '@services/auth/auth.service';
 
 type Credentials = {
@@ -68,6 +67,8 @@ export function useSignIn() {
 
 		try {
 			const response = await loginWithEmailOrCpf(credentials.emailOuCpf, credentials.password);
+			const { save } = useAuthStore();
+			await save(response.userId, response.displayName);
 			return response;
 		} catch (error) {
 			setErrorMessage(mapAuthError(error));
