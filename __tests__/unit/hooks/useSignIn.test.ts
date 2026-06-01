@@ -3,6 +3,12 @@ import { act, renderHook } from '@testing-library/react-native';
 import { useSignIn } from '@/src/hooks/auth/useSignIn';
 import { loginWithEmailOrCpf } from '@services/auth/auth.service';
 
+jest.mock('@/src/store/auth-store', () => ({
+  useAuthStore: jest.fn(() => ({
+    save: jest.fn().mockResolvedValue(undefined),
+  })),
+}));
+
 jest.mock('@services/auth/auth.service', () => ({
   loginWithEmailOrCpf: jest.fn(),
 }));
