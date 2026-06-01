@@ -1,9 +1,9 @@
-﻿import React from 'react';
-import { ScrollView, StyleSheet, Text } from 'react-native';
+﻿import ContactsCard from '@/components/ContactsCard';
 import { View } from '@/components/Themed';
 import { useAuthStore } from '@/src/store/auth-store';
 import { StatusBar } from 'expo-status-bar';
-import ContactsCard from '@/components/ContactsCard';
+import React from 'react';
+import { ScrollView, StyleSheet, Text } from 'react-native';
 
 export default function ContactsPage() {
   const { user, isLoading } = useAuthStore();
@@ -22,7 +22,7 @@ export default function ContactsPage() {
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <Text style={styles.title}>Contatos</Text>
         <Text style={styles.subtitle}>Gerencie seus contatos de emergência.</Text>
-        {user ? <ContactsCard userId={user.userId} /> : <Text style={styles.loadingText}>Usuário não encontrado.</Text>}
+        {user ? <ContactsCard userId={user.userId} editable /> : <Text style={styles.loadingText}>Usuário não encontrado.</Text>}
       </ScrollView>
     </View>
   );

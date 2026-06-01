@@ -6,6 +6,7 @@ import {
     deleteDoc,
     doc,
     getDocs,
+    onSnapshot,
     serverTimestamp,
     updateDoc
 } from "firebase/firestore";
@@ -36,9 +37,36 @@ export async function getActiveContacts(userId: string) {
         const activeContactsRef = collection(database, "users", userId, "activeContacts");
 
         const snap = await getDocs(activeContactsRef);
-        return snap.empty ? null : snap.docs.map(doc => doc.data());
+        return snap.empty
+            ? null
+            : snap.docs.map(doc => ({ id: doc.id, ...(doc.data() as Record<string, any>) }));
     } catch (error) {
         devLog("[getActiveContacts] erro", error);
+        throw error;
+    }
+}
+
+export function subscribeActiveContacts(userId: string, callback: (data: any[] | null) => void) {
+    try {
+        const database = requireDb();
+        const activeContactsRef = collection(database, "users", userId, "activeContacts");
+
+        const unsub = onSnapshot(activeContactsRef, (snap) => {
+            try {
+                const data = snap.empty ? null : snap.docs.map(doc => ({ id: doc.id, ...(doc.data() as Record<string, any>) }));
+                callback(data);
+            } catch (e) {
+                devLog('[subscribeActiveContacts] erro ao processar snapshot', e);
+                callback(null);
+            }
+        }, (error) => {
+            devLog('[subscribeActiveContacts] snapshot error', error);
+            callback(null);
+        });
+
+        return unsub;
+    } catch (error) {
+        devLog('[subscribeActiveContacts] erro', error);
         throw error;
     }
 }

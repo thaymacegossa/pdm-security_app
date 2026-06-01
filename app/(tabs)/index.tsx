@@ -25,7 +25,7 @@ export default function HomePage() {
         <Text style={styles.pageSubtitle}>Resumo rápido dos seus contatos e alertas.</Text>
         {user ? (
           <>
-            <ContactsCard userId={user.userId} />
+            <ContactsCard userId={user.userId} realtime />
             <AlertsCard userId={user.userId} limit={3} />
           </>
         ) : (
