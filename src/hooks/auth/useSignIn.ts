@@ -1,7 +1,6 @@
-
-
 import { useCallback, useMemo, useState } from 'react';
 
+import { useAuthStore } from '@/src/store/auth-store';
 import { loginWithEmailOrCpf } from '@services/auth/auth.service';
 
 type Credentials = {
@@ -40,6 +39,7 @@ function mapAuthError(error: unknown): string {
 }
 
 export function useSignIn() {
+	const { save: saveAuth } = useAuthStore();
 	const [emailOuCpf, setEmailOuCpf] = useState('');
 	const [password, setPassword] = useState('');
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -68,6 +68,7 @@ export function useSignIn() {
 
 		try {
 			const response = await loginWithEmailOrCpf(credentials.emailOuCpf, credentials.password);
+			await saveAuth(response.userId, response.displayName);
 			return response;
 		} catch (error) {
 			setErrorMessage(mapAuthError(error));
@@ -75,7 +76,7 @@ export function useSignIn() {
 		} finally {
 			setIsLoading(false);
 		}
-	}, [emailOuCpf, isFormValid, isLoading, password]);
+	}, [emailOuCpf, isFormValid, isLoading, password, saveAuth]);
 
 	return {
 		emailOuCpf,

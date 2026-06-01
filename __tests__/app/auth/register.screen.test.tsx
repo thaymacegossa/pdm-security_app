@@ -1,7 +1,7 @@
 import { fireEvent, render, waitFor } from '@testing-library/react-native';
 
 import RegisterRoute from '@/app/(auth)/register';
-import { useRegister } from '@/src/hooks/useRegister';
+import { useRegister } from '@/src/hooks/auth/useRegister';
 
 const mockReplace = jest.fn();
 
@@ -12,7 +12,7 @@ jest.mock('expo-router', () => ({
   },
 }));
 
-jest.mock('@/src/hooks/useRegister', () => ({
+jest.mock('@/src/hooks/auth/useRegister', () => ({
   useRegister: jest.fn(),
 }));
 

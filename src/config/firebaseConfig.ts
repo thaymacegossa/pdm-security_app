@@ -1,7 +1,6 @@
 import { getApp, getApps, initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
-import { Platform } from 'react-native';
 
 function sanitizeEnvValue(value?: string): string | undefined {
     if (!value) return value;
@@ -43,20 +42,6 @@ if (USE_FIREBASE) {
     } catch (error) {
         console.error('Firebase initialization error:', error);
         throw error;
-    }
-
-    if (Platform.OS === 'web') {
-        import('firebase/analytics')
-            .then(({ getAnalytics }) => {
-                try {
-                    getAnalytics(app);
-                } catch (error) {
-                    console.warn('Firebase analytics initialization warning:', error);
-                }
-            })
-            .catch((error) => {
-                console.warn('Firebase analytics module warning:', error);
-            });
     }
 
     db = getFirestore(app);
