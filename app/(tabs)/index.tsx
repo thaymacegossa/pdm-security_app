@@ -26,7 +26,7 @@ export default function HomePage() {
         {user ? (
           <>
             <ContactsCard userId={user.userId} />
-            <AlertsCard userId={user.userId} />
+            <AlertsCard userId={user.userId} limit={3} />
           </>
         ) : (
           <Text style={styles.pageSubtitle}>Usuário não encontrado.</Text>

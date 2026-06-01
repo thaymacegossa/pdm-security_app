@@ -2,7 +2,7 @@ import { deleteAlert, saveAlert } from "@/src/services/firebase/alert.service";
 import { getCurrentLocation, LocationData } from "@/src/services/location.service";
 import { devLog } from '@utils/dev-log';
 
-export async function alertTrigger(userId: string): Promise<{
+export async function alertTrigger(userId: string, userName: string): Promise<{
     alertId: string;
     location: LocationData;
 } | null> {
@@ -22,6 +22,7 @@ export async function alertTrigger(userId: string): Promise<{
             actualAlert: true,
             geolocation,
             location: address,
+            userName,
         });
 
         devLog('[alertTrigger] alerta salvo no Firebase', { alertId });

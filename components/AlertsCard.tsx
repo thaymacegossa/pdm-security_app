@@ -1,4 +1,4 @@
-import { getAlert } from '@/src/services/firebase/alert.service';
+import { subscribeAlerts } from '@/src/services/firebase/alert.service';
 import { devLog } from '@/src/utils/dev-log';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
@@ -12,6 +12,7 @@ type Alert = {
 
 type AlertsCardProps = {
   userId: string;
+  limit?: number;
 };
 
 function formatDate(timestamp: any): string {
@@ -43,15 +44,15 @@ function formatDate(timestamp: any): string {
   return date.toLocaleDateString('pt-BR');
 }
 
-export default function AlertsCard({ userId }: AlertsCardProps) {
+export default function AlertsCard({ userId, limit }: AlertsCardProps) {
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchAlerts = async () => {
+    setIsLoading(true);
+
+    const unsub = subscribeAlerts(userId, (data) => {
       try {
-        setIsLoading(true);
-        const data = await getAlert(userId);
         if (data) {
           const sorted = (data as Alert[])
             .sort((a, b) => {
@@ -59,22 +60,35 @@ export default function AlertsCard({ userId }: AlertsCardProps) {
               const dateB = b.startedAt?.toDate?.() || new Date(0);
               return dateB.getTime() - dateA.getTime();
             })
-            .slice(0, 3);
+            .slice(0, limit || Infinity);
           setAlerts(sorted);
+        } else {
+          setAlerts([]);
         }
       } catch (error) {
-        devLog('[AlertsCard] erro ao carregar alertas', error);
+        devLog('[AlertsCard] erro ao processar alertas', error);
       } finally {
         setIsLoading(false);
       }
-    };
+    }, limit);
 
-    fetchAlerts();
-  }, [userId]);
+    return () => {
+      try {
+        unsub && unsub();
+      } catch (e) {
+        // ignore
+      }
+    };
+  }, [userId, limit]);
+
+  const displayedCount = typeof limit === 'number' ? Math.min(limit, alerts.length) : null;
+
+  const titleText =
+    displayedCount !== null ? `🚨 Últimas ${displayedCount} Chamadas de Emergência` : '🚨 Últimas Chamadas de Emergência';
 
   return (
     <View style={styles.card}>
-      <Text style={styles.title}>🚨 Últimas Chamadas de Emergência</Text>
+      <Text style={styles.title}>{titleText}</Text>
 
       {isLoading ? (
         <ActivityIndicator color="#666" size="small" style={styles.loader} />

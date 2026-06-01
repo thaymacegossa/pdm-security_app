@@ -57,7 +57,7 @@ export default function SlideToCall({ user }: SlideToCallProps) {
     setAlertStatus('sending');
 
     try {
-      const result = await alertTrigger(user.userId);
+      const result = await alertTrigger(user.userId, user.name);
 
       if (result?.alertId && result.location) {
         const endereco =

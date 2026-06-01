@@ -5,8 +5,12 @@ import {
     collection,
     deleteDoc,
     doc,
+    limit as firestoreLimit,
     getDocs,
-    serverTimestamp
+    onSnapshot,
+    orderBy,
+    query,
+    serverTimestamp,
 } from "firebase/firestore";
 
 
@@ -33,7 +37,8 @@ export async function getAlert(userId: string) {
     try {
         const database = requireDb();
         const alertRef = collection(database, "users", userId, "alerts");
-        const alertSnap = await getDocs(alertRef);
+        const q = query(alertRef, orderBy('startedAt', 'desc'));
+        const alertSnap = await getDocs(q);
         if (!alertSnap.empty) {
             return alertSnap.docs.map(doc => doc.data());
         } else {
@@ -49,6 +54,7 @@ export async function saveAlert(userId: string, alertData: {
     actualAlert: boolean;
     geolocation: { latitude: number; longitude: number };
     location: string;
+    userName?: string;
 }) {
     try {
         const database = requireDb();
@@ -73,4 +79,34 @@ export async function deleteAlert(userId: string, alertId: string) {
         devLog("[deleteAlert] erro", error);
         throw error;
     }
+}
+
+export function subscribeAlerts(
+    userId: string,
+    onChange: (alerts: any[] | null) => void,
+    maxItems?: number
+) {
+    const database = requireDb();
+    const alertsRef = collection(database, 'users', userId, 'alerts');
+    const q = typeof maxItems === 'number'
+        ? query(alertsRef, orderBy('startedAt', 'desc'), firestoreLimit(maxItems))
+        : query(alertsRef, orderBy('startedAt', 'desc'));
+
+    const unsub = onSnapshot(q, (snapshot) => {
+        try {
+            if (!snapshot.empty) {
+                onChange(snapshot.docs.map(d => d.data()));
+            } else {
+                onChange([]);
+            }
+        } catch (error) {
+            devLog('[subscribeAlerts] erro ao processar snapshot', error);
+            onChange(null);
+        }
+    }, (error) => {
+        devLog('[subscribeAlerts] erro', error);
+        onChange(null);
+    });
+
+    return unsub;
 }
