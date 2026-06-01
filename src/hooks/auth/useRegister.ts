@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 
+import { useAuthStore } from '@/src/store/auth-store';
 import { auth } from '@config/firebaseConfig';
 import { saveUserProfile } from '@services/firebase/user.service';
 import { devLog } from '@utils/dev-log';
@@ -102,6 +103,8 @@ export function useRegister() {
 			});
 
 			devLog('[useRegister] usuario registrado', { userId: user.uid });
+			const { save } = useAuthStore();
+			await save(user.uid, user.displayName || data.name);
 			return {
 				userId: user.uid,
 				token: await user.getIdToken(),
