@@ -1,4 +1,4 @@
-import FontAwesome from '@expo/vector-icons/FontAwesome';
+import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import { Tabs, useRouter } from 'expo-router';
 import React from 'react';
 import { Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -11,6 +11,7 @@ import { useAuthStore } from '@/src/store/auth-store';
 import { logout } from '@services/auth/auth.service';
 
 type RoutePath = '/' | '/contactsPage' | '/alertsPage';
+type IconName = React.ComponentProps<typeof FontAwesome5>['name'];
 
 function CustomHeader() {
   const { user, clear } = useAuthStore();
@@ -35,7 +36,7 @@ function CustomHeader() {
       </View>
 
       <Pressable style={styles.logoutButton} onPress={handleLogout}>
-        <FontAwesome name="sign-out" size={22} color="#f44336" />
+        <FontAwesome5 name="sign-out-alt" size={22} color="#f44336" />
       </Pressable>
     </View>
   );
@@ -62,10 +63,10 @@ function BottomNavigation() {
   const colorScheme = useColorScheme();
   const tintColor = Colors[colorScheme ?? 'light'].tint;
 
-  const navigationItems = [
-    { icon: 'home', label: 'Principal', path: '/' },
-    { icon: 'address-book', label: 'Contatos', path: '/contactsPage' },
-    { icon: 'exclamation-triangle', label: 'Alertas', path: '/alertsPage' },
+  const navigationItems: { icon: IconName; label: string; path: RoutePath; color: string }[] = [
+    { icon: 'home', label: 'Principal', path: '/', color: '#666' },
+    { icon: 'address-book', label: 'Contatos', path: '/contactsPage', color: '#666' },
+    { icon: 'exclamation-triangle', label: 'Alertas', path: '/alertsPage', color: '#666' },
   ];
 
   return (
@@ -74,10 +75,10 @@ function BottomNavigation() {
         <TouchableOpacity
           key={item.path}
           style={styles.navButton}
-          onPress={() => router.push(item.path as RoutePath)}
+          onPress={() => router.push(item.path)}
         >
-          <FontAwesome name={item.icon as any} size={24} color={tintColor} />
-          <Text style={[styles.navLabel, { color: tintColor }]}>{item.label}</Text>
+          <FontAwesome5 name={item.icon} size={24} color={item.color} solid />
+          <Text style={[styles.navLabel, { color: item.color }]}>{item.label}</Text>
         </TouchableOpacity>
       ))}
     </View>
@@ -86,10 +87,10 @@ function BottomNavigation() {
 
 // You can explore the built-in icon families on the web at https://icons.expo.fyi/
 function TabBarIcon(props: {
-  name: React.ComponentProps<typeof FontAwesome>['name'];
+  name: IconName;
   color: string;
 }) {
-  return <FontAwesome size={28} style={{ marginBottom: -3 }} {...props} />;
+  return <FontAwesome5 size={28} style={{ marginBottom: -3 }} solid {...props} />;
 }
 
 export default function TabLayout() {
