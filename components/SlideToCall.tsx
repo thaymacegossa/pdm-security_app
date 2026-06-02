@@ -1,6 +1,6 @@
 // components/SlideToUnlock.tsx
 import { alertTrigger, cancelAlert } from '@/src/hooks/alert/alert';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -18,6 +18,7 @@ const { width } = Dimensions.get('window');
 const THUMB_SIZE = 60;
 const SLIDER_WIDTH = width - 60;
 const MAX_TRANSLATE = SLIDER_WIDTH - THUMB_SIZE;
+const SUCCESS_FEEDBACK_DURATION_MS = 4000;
 
 type AlertStatus = 'idle' | 'sending' | 'success' | 'error';
 
@@ -34,6 +35,19 @@ export default function SlideToCall({ user }: SlideToCallProps) {
   const [alertStatus, setAlertStatus] = useState<AlertStatus>('idle');
   const [alertLocation, setAlertLocation] = useState<string | null>(null);
   const [activeAlertId, setActiveAlertId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (alertStatus !== 'success') {
+      return;
+    }
+
+    const timeout = setTimeout(() => {
+      resetSlider();
+      setAlertLocation(null);
+    }, SUCCESS_FEEDBACK_DURATION_MS);
+
+    return () => clearTimeout(timeout);
+  }, [alertStatus]);
 
   const resetSlider = () => {
     Animated.spring(translateX, {
