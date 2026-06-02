@@ -11,7 +11,7 @@ import { useColorScheme } from '@/components/useColorScheme';
 export { ErrorBoundary } from 'expo-router';
 
 export const unstable_settings = {
-  initialRouteName: '(auth)',
+  initialRouteName: 'index',
 };
 
 SplashScreen.preventAutoHideAsync();
