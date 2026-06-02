@@ -23,7 +23,7 @@ O projeto foi estruturado em camadas para separar interface, regras de negócio 
 - Interface e navegação no padrão Expo Router
 - Hooks para encapsular estado e validações de formulários
 - Serviços para autenticação, geolocalização e Firebase Firestore
-- Store simples para sessão local da usuária
+- Store global de sessão com hidratação no bootstrap da aplicação
 - Testes unitários e de tela com Jest e Testing Library
 
 ## Funcionalidades implementadas
@@ -33,7 +33,8 @@ O projeto foi estruturado em camadas para separar interface, regras de negócio 
 - Tela de login com entrada por email ou CPF
 - Tela de cadastro com nome, CPF, email, telefone, senha e senha de emergência opcional
 - Mapeamento de erros de autenticação para mensagens amigáveis
-- Persistência local de sessão da usuária
+- Persistência local de sessão da usuária com fallback de armazenamento
+- Redirecionamento automático para área interna quando sessão já está ativa
 
 Arquivos principais:
 
@@ -67,6 +68,7 @@ Arquivo principal:
 ### 4. Camada Firebase (base para operação)
 
 - Inicialização condicional via variável de ambiente
+- Inicialização do Firebase Auth com persistência no React Native
 - Serviço de perfil de usuária
 - Serviço de alertas
 - Serviço de contatos ativos
@@ -85,7 +87,8 @@ Arquivos principais:
 - Navegação por rotas em [app](app)
 - Regras de formulário e ação assíncrona em hooks
 - Acesso a provedores externos (Firebase, Location) em serviços
-- Persistência de autenticação no dispositivo via SecureStore (mobile) e localStorage (web)
+- Persistência de autenticação no dispositivo via SecureStore com fallback AsyncStorage (mobile) e localStorage (web)
+- Store global baseada em subscribe/snapshot para sincronizar sessão entre telas
 
 ### Fluxo técnico de login
 
@@ -93,8 +96,15 @@ Arquivos principais:
 2. Hook valida formulário e chama serviço de autenticação.
 3. Se a entrada for CPF, o serviço busca email correspondente no Firestore.
 4. Autenticação no Firebase Auth.
-5. Hook salva sessão local com userId e nome.
-6. Navegação para área interna de abas.
+5. Sessão é persistida no store global com userId e nome.
+6. Rota inicial valida sessão hidratada e redireciona para a área interna de abas.
+
+### Fluxo técnico de inicialização do app
+
+1. App abre na rota [app/index.tsx](app/index.tsx).
+2. A store hidrata sessão local e expõe estado de carregamento.
+3. Se existir sessão, redireciona para [app/(tabs)](app/(tabs)).
+4. Se não existir sessão, redireciona para [app/(auth)/sign-in.tsx](app/(auth)/sign-in.tsx).
 
 ### Fluxo técnico de cadastro
 
@@ -109,12 +119,15 @@ Arquivos principais:
 
 ```text
 app/
+ index.tsx
+ _layout.tsx
  (auth)/
+  _layout.tsx
   sign-in.tsx
   register.tsx
  (tabs)/
+  _layout.tsx
   index.tsx
- _layout.tsx
 
 src/
  config/
@@ -156,6 +169,7 @@ __tests__/
 - React Native 0.81
 - Expo Router 6
 - Firebase (Auth + Firestore)
+- expo-secure-store e @react-native-async-storage/async-storage
 - Jest 29 + jest-expo
 - Testing Library React Native
 - TypeScript
@@ -252,12 +266,14 @@ Configuração atual de limite global de cobertura no [package.json](package.jso
 
 ```mermaid
 flowchart TD
-  A[App inicia] --> B[Tela de login]
-  B -->|Cadastrar-se| C[Tela de cadastro]
-  C -->|Sucesso| B
-  B -->|Login válido| D[Área de abas]
-  D --> E[Deslize para pedir ajuda]
-  E --> F[Mensagem de confirmação]
+  A[App inicia] --> B[Hidrata sessão local]
+  B -->|Sessão ativa| C[Área de abas]
+  B -->|Sem sessão| D[Tela de login]
+  D -->|Cadastrar-se| E[Tela de cadastro]
+  E -->|Sucesso| D
+  D -->|Login válido| C
+  C --> F[Deslize para pedir ajuda]
+  F --> G[Mensagem de confirmação]
 ```
 
 ## Status atual e próximos passos
@@ -266,6 +282,8 @@ Já implementado:
 
 - Base de autenticação e cadastro
 - Integração com Firebase em camada de serviços
+- Sessão persistida com store global e hidratação no bootstrap
+- Guardas de rota para redirecionamento por sessão ativa
 - Captura de localização
 - Gesto de pedido de ajuda na interface
 - Testes unitários e de tela cobrindo os módulos principais
@@ -273,5 +291,4 @@ Já implementado:
 Evoluções naturais para as próximas iterações:
 
 - Integrar o gesto de SOS ao serviço de alerta real
-- Adicionar gerenciamento visual de contatos ativos nas telas
 - Implementar políticas de segurança e criptografia para dados sensíveis
