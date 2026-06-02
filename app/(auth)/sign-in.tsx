@@ -1,7 +1,7 @@
 
 
 import { router } from 'expo-router';
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import {
     ActivityIndicator,
     Keyboard,
@@ -16,8 +16,10 @@ import {
 
 import Colors from '@/constants/Colors';
 import { useSignIn } from '@/src/hooks/auth/useSignIn';
+import { useAuthStore } from '@/src/store/auth-store';
 
 export default function SignInRoute() {
+	const { user, isLoading: isAuthLoading } = useAuthStore();
 	const {
 		emailOuCpf,
 		setEmailOuCpf,
@@ -29,6 +31,12 @@ export default function SignInRoute() {
 		isLoading,
 		signIn,
 	} = useSignIn();
+
+	useEffect(() => {
+		if (!isAuthLoading && user) {
+			router.replace('/(tabs)');
+		}
+	}, [isAuthLoading, user]);
 
 	const handleSubmit = useCallback(async () => {
 		const result = await signIn();
